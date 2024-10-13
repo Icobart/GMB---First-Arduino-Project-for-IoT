@@ -61,7 +61,7 @@ void setup()
     currIntensity = 0;
     fadeAmount = 5;
     pinMode(LEDPULSE, OUTPUT);
-    /*to do: potentiometer and lcd*/
+    /*to do: lcd*/
     Serial.begin(9600);
 }
 
@@ -71,7 +71,7 @@ void loop()
     switch (state)
     {
     case gameStatus::WAITING_START:
-    // todo : lampeggio+testo (10 sec)
+    // todo : testo lcd
         if (buttons[0] == 1) //start
         {
             state = gameStatus::PREGAME;
@@ -101,8 +101,13 @@ void loop()
 
 void wakeUp()
 {
-    // This function will be called when an interrupt occurs
-    // It should be empty to just wake up the microcontroller
+    sleep_disable();
+    for (int i = 0; i < NUM_OF_BUTTON; i++)
+    {
+        detachInterrupt(digitalPinToInterrupt(pinToRead[i]));
+    }
+    startTime = millis();
+    state = gameStatus::WAITING_START;
 }
 
 void setIdle()
@@ -114,21 +119,12 @@ void setIdle()
         attachInterrupt(digitalPinToInterrupt(pinToRead[i]), wakeUp, RISING);
     }
     sleep_mode();
-    sleep_disable();
-    for (int i = 0; i < NUM_OF_BUTTON; i++)
-    {
-        detachInterrupt(digitalPinToInterrupt(pinToRead[i]));
-    }
-    startTime = millis();
-    state = gameStatus::WAITING_START;
 }
 
 void selectDifficultyLevel()
 {
     int potValue = analogRead(POTENTIOMETER);
     difficultyLevel = map(potValue, 0, 1023, 1, 4);
-    Serial.print("Selected Difficulty Level: ");
-    Serial.println(difficultyLevel);
 }
 
 void fadingLeds()
