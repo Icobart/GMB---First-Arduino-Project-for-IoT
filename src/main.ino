@@ -28,6 +28,7 @@ int greenLeds[NUM_OF_LED];
 int brightness;
 int fadeAmount;
 int currIntensity;
+int difficultyLevel;
 unsigned long startTime = millis();
 
 gameStatus state;
@@ -35,6 +36,8 @@ gameStatus state;
 void wakeUp();
 
 void setIdle();
+
+void selectDifficultyLevel();
 
 void fadingLeds();
 
@@ -73,6 +76,7 @@ void loop()
         {
             state = gameStatus::PREGAME;
         }
+        selectDifficultyLevel();
         fadingLeds();
         
         if (millis() - startTime >= 10000) {
@@ -117,6 +121,14 @@ void setIdle()
     }
     startTime = millis();
     state = gameStatus::WAITING_START;
+}
+
+void selectDifficultyLevel()
+{
+    int potValue = analogRead(POTENTIOMETER);
+    difficultyLevel = map(potValue, 0, 1023, 1, 4);
+    Serial.print("Selected Difficulty Level: ");
+    Serial.println(difficultyLevel);
 }
 
 void fadingLeds()
