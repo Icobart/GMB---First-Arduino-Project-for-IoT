@@ -7,7 +7,7 @@
 
 The game board includes 4 green LEDs L1, L2, L3, L4 and red LED LS, four tactile buttons B1, B2, B3, B4, a potentiometer Pot, and an LCD. This is the suggested layout:
 
-![Suggested Layout](path/to/your/image.png)
+![Suggested Layout](img/project.png)
 
 In the game, LEDs represent the binary digits of a number (0..15). During the game, the system repeatedly displays a number in decimal notation on the LCD and the player must turn on the proper LEDs defining the same number in binary notation (L1 is the most significant bit, L4 the least significant bit). For instance, if the number 13 is displayed on the LCD, the player must turn on the LEDs L1, L2, and L4. To turn on the LEDs, the player can use the tactile buttons. Each button Bi turns on the corresponding LED Li. Each game involves multiple rounds. At each round, a number (at random) is displayed and the player must compose the binary version within some maximum time T1. If the player does it right, a score - starting from zero - is increased and the game goes on with another round, reducing the time T1 by some factor F. If the player does not compose the correct number on time, the red LED LS is turned on for 1 second and the game ends, displaying the score on the LCD.
 
