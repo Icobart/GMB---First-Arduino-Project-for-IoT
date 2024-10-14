@@ -136,9 +136,10 @@ void loop()
         for (int i = 0; i < NUM_OF_BUTTON; i++) {
             if (buttons[i] == HIGH && previousButtonStates[i] == LOW) {
                 greenLeds[i] = !greenLeds[i];
-                previousButtonStates[i] = buttons[i]; // Update the previous state
             }
+            previousButtonStates[i] = buttons[i]; // Update the previous state
         }
+        writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
 
         // Check if the player has composed the correct number
         composedNumber = 0;
@@ -162,12 +163,17 @@ void loop()
             T1 = max(T1 * FACTOR, MIN_T1); // Ensure T1 does not go below a minimum value
             correct = false;
             roundStartTime = millis();
+            // Reset every state to 0
+            for (int i = 0; i < NUM_OF_BUTTON; i++) {
+                previousButtonStates[i] = 0;
+              	buttons[i] = 0;
+            }
             // Turn off all LEDs
             for (int i = 0; i < NUM_OF_LED; i++) {
                 greenLeds[i] = 0;
                 digitalWrite(pinToWrite[i], LOW);
             }
-
+          	writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
             // Generate a random number between 0 and 15
             targetNumber = random(0, 16);
 
@@ -176,10 +182,6 @@ void loop()
             lcd.setCursor(0, 0);
             lcd.print("Number: ");
             lcd.print(targetNumber);
-            // Reset every state to 0
-            for (int i = 0; i < NUM_OF_BUTTON; i++) {
-                previousButtonStates[i] = 0;
-            }
         } else if (!correct && millis() - roundStartTime >= T1) {
             state = gameStatus::GAME_OVER;
         }
@@ -206,8 +208,6 @@ void loop()
     default:
         break;
     }
-
-    writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
 }
 
 void wakeUp()
