@@ -31,6 +31,7 @@ int brightness;
 int fadeAmount;
 int currIntensity;
 int difficultyLevel;
+int score;
 unsigned long startTime = millis();
 
 gameStatus state;
@@ -79,7 +80,7 @@ void loop()
     case gameStatus::WAITING_START:
     // todo : testo lcd
         lcdInitialPrint();
-        if (buttons[0] == 1) //start
+        if (buttons[0] == 1)
         {
             state = gameStatus::PREGAME;
         }
@@ -91,6 +92,18 @@ void loop()
         }
         break;
     case gameStatus::PREGAME:
+        for (int i = 0; i < NUM_OF_LED; i++) {
+            greenLeds[i] = 0;
+            digitalWrite(pinToWrite[i], LOW);
+        }
+        analogWrite(LEDPULSE, 0);
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Go!");
+        delay(2000); // Display the message for 2 seconds
+        lcd.clear();
+        score = 0;
+        state = gameStatus::GAME_LOOP;
         break;
     case gameStatus::GAME_LOOP:
         break;
