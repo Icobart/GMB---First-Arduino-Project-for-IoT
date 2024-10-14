@@ -38,6 +38,7 @@ int score;
 bool correct=false;
 int targetNumber;
 int composedNumber;
+int previousButtonStates[NUM_OF_BUTTON] = {0};
 unsigned long roundStartTime;
 unsigned long T1 = 10000;
 unsigned long startTime = millis();
@@ -77,6 +78,7 @@ void setup()
     /*to do: lcd*/
     lcd.init();
     lcd.backlight();
+    lcd.display();
     Serial.begin(9600);
 }
 
@@ -132,13 +134,16 @@ void loop()
     case gameStatus::GAME_LOOP:
         // Update LEDs based on button presses
         for (int i = 0; i < NUM_OF_BUTTON; i++) {
-            greenLeds[i] = buttons[i];
+            if (buttons[i] == HIGH && previousButtonStates[i] == LOW) {
+                greenLeds[i] = !greenLeds[i];
+                previousButtonStates[i] = buttons[i]; // Update the previous state
+            }
         }
 
         // Check if the player has composed the correct number
         composedNumber = 0;
         for (int i = 0; i < NUM_OF_BUTTON; i++) {
-            composedNumber |= (buttons[i] << i);
+            composedNumber |= (greenLeds[i] << i);
         }
 
         if (composedNumber == targetNumber) {
@@ -171,6 +176,10 @@ void loop()
             lcd.setCursor(0, 0);
             lcd.print("Number: ");
             lcd.print(targetNumber);
+            // Reset every state to 0
+            for (int i = 0; i < NUM_OF_BUTTON; i++) {
+                previousButtonStates[i] = 0;
+            }
         } else if (!correct && millis() - roundStartTime >= T1) {
             state = gameStatus::GAME_OVER;
         }
@@ -251,21 +260,17 @@ void readButtons(int *pinToRead, int *buttons, int size)
 {
     static int lastButtonState[NUM_OF_BUTTON] = {LOW};
     static unsigned long lastDebounceTime[NUM_OF_BUTTON] = {0};
-
     for (int i = 0; i < size; i++)
     {
         int reading = digitalRead(pinToRead[i]);
-
         if (reading != lastButtonState[i])
         {
             lastDebounceTime[i] = millis();
         }
-
         if ((millis() - lastDebounceTime[i]) > DEBOUNCE_DELAY)
         {
             buttons[i] = reading;
         }
-
         lastButtonState[i] = reading;
     }
 }
