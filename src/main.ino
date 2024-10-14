@@ -2,6 +2,8 @@
 #include <avr/sleep.h>/*
 #include "func.h"*/
 #include "TimerOne.h"
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 #define NUM_OF_BUTTON 4
 #define NUM_OF_LED 4
@@ -33,6 +35,8 @@ unsigned long startTime = millis();
 
 gameStatus state;
 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 void wakeUp();
 
 void setIdle();
@@ -62,6 +66,8 @@ void setup()
     fadeAmount = 5;
     pinMode(LEDPULSE, OUTPUT);
     /*to do: lcd*/
+    lcd.init();
+    lcd.setBacklight();
     Serial.begin(9600);
 }
 
@@ -72,6 +78,7 @@ void loop()
     {
     case gameStatus::WAITING_START:
     // todo : testo lcd
+        lcdInitialPrint();
         if (buttons[0] == 1) //start
         {
             state = gameStatus::PREGAME;
@@ -139,7 +146,10 @@ void fadingLeds()
 
 void lcdInitialPrint()
 {
-    //todo
+    lcd.setCursor(0, 0);
+    lcd.print("System Ready");
+    lcd.setCursor(0, 1);
+    lcd.print("Press Button");
 }
 
 void readButtons(int *pinToRead, int *buttons, int size)
