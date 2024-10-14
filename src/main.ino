@@ -130,11 +130,6 @@ void loop()
         lcd.print(targetNumber);
         break;
     case gameStatus::GAME_LOOP:
-
-        // Start timing for the round
-
-        //readButtons(pinToRead, buttons, NUM_OF_BUTTON);
-
         // Update LEDs based on button presses
         for (int i = 0; i < NUM_OF_BUTTON; i++) {
             greenLeds[i] = buttons[i];
