@@ -108,6 +108,19 @@ void loop()
     case gameStatus::GAME_LOOP:
         break;
     case gameStatus::GAME_OVER:
+        digitalWrite(LEDPULSE, HIGH);
+        delay(1000);
+        digitalWrite(LEDPULSE, LOW);
+
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Game Over");
+        lcd.setCursor(0, 1);
+        lcd.print("Final Score: ");
+        lcd.print(score);
+        delay(10000);
+
+        state = gameStatus::WAITING_START;
         break;
     case gameStatus::SLEEP:
         setIdle();
