@@ -116,11 +116,17 @@ void loop()
         //setup for the first round
         correct = false;
         roundStartTime = millis();
+        // Reset every state to 0
+        for (int i = 0; i < NUM_OF_BUTTON; i++) {
+            previousButtonStates[i] = 0;
+            buttons[i] = 0;
+        }
         // Turn off all LEDs
         for (int i = 0; i < NUM_OF_LED; i++) {
             greenLeds[i] = 0;
             digitalWrite(pinToWrite[i], LOW);
         }
+        writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
 
         // Generate a random number between 0 and 15
         targetNumber = random(0, 16);
@@ -236,6 +242,7 @@ void selectDifficultyLevel()
 {
     int potValue = analogRead(POTENTIOMETER);
     difficultyLevel = map(potValue, 0, 1023, 1, 4);
+    T1 = 10000 / difficultyLevel;
 }
 
 void fadingLeds()
