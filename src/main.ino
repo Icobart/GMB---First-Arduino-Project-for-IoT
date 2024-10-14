@@ -37,6 +37,7 @@ int difficultyLevel;
 int score;
 bool correct=false;
 int targetNumber;
+int composedNumber;
 unsigned long roundStartTime;
 unsigned long T1 = 10000;
 unsigned long startTime = millis();
@@ -140,7 +141,7 @@ void loop()
         }
 
         // Check if the player has composed the correct number
-        int composedNumber = 0;
+        composedNumber = 0;
         for (int i = 0; i < NUM_OF_BUTTON; i++) {
             composedNumber |= (buttons[i] << i);
         }
