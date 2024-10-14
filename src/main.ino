@@ -11,6 +11,9 @@
 #define POTENTIOMETER A0
 #define LCD_SDA A4
 #define LCD_SCL A5
+#define SCORE_INCREMENT 100
+#define MIN_T1 1000
+#define FACTOR 0.9
 #define DEBOUNCE_DELAY 50
 
 typedef enum {
@@ -32,6 +35,10 @@ int fadeAmount;
 int currIntensity;
 int difficultyLevel;
 int score;
+bool correct=false;
+int targetNumber;
+unsigned long roundStartTime;
+unsigned long T1 = 10000;
 unsigned long startTime = millis();
 
 gameStatus state;
@@ -68,7 +75,7 @@ void setup()
     pinMode(LEDPULSE, OUTPUT);
     /*to do: lcd*/
     lcd.init();
-    lcd.setBacklight();
+    lcd.backlight();
     Serial.begin(9600);
 }
 
@@ -78,7 +85,6 @@ void loop()
     switch (state)
     {
     case gameStatus::WAITING_START:
-    // todo : testo lcd
         lcdInitialPrint();
         if (buttons[0] == 1)
         {
@@ -104,8 +110,74 @@ void loop()
         lcd.clear();
         score = 0;
         state = gameStatus::GAME_LOOP;
+        //setup for the first round
+        correct = false;
+        roundStartTime = millis();
+        // Turn off all LEDs
+        for (int i = 0; i < NUM_OF_LED; i++) {
+            greenLeds[i] = 0;
+            digitalWrite(pinToWrite[i], LOW);
+        }
+
+        // Generate a random number between 0 and 15
+        targetNumber = random(0, 16);
+
+        // Display the random number on the LCD
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Number: ");
+        lcd.print(targetNumber);
         break;
     case gameStatus::GAME_LOOP:
+
+        // Start timing for the round
+
+        readButtons(pinToRead, buttons, NUM_OF_BUTTON);
+
+        // Update LEDs based on button presses
+        for (int i = 0; i < NUM_OF_BUTTON; i++) {
+            greenLeds[i] = buttons[i];
+        }
+
+        // Check if the player has composed the correct number
+        int composedNumber = 0;
+        for (int i = 0; i < NUM_OF_BUTTON; i++) {
+            composedNumber |= (buttons[i] << i);
+        }
+
+        if (composedNumber == targetNumber) {
+            correct = true;
+        }
+
+        if (correct && millis() - roundStartTime < T1) {
+            score += SCORE_INCREMENT;
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("GOOD! Score: ");
+            lcd.print(score);
+            delay(2000); // Display the message for 2 seconds
+
+            // Reduce the time T1 by some factor FACTOR
+            T1 = max(T1 * FACTOR, MIN_T1); // Ensure T1 does not go below a minimum value
+            correct = false;
+            roundStartTime = millis();
+            // Turn off all LEDs
+            for (int i = 0; i < NUM_OF_LED; i++) {
+                greenLeds[i] = 0;
+                digitalWrite(pinToWrite[i], LOW);
+            }
+
+            // Generate a random number between 0 and 15
+            targetNumber = random(0, 16);
+
+            // Display the random number on the LCD
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Number: ");
+            lcd.print(targetNumber);
+        } else if (!correct && millis() - roundStartTime >= T1) {
+            state = gameStatus::GAME_OVER;
+        }
         break;
     case gameStatus::GAME_OVER:
         digitalWrite(LEDPULSE, HIGH);
@@ -119,7 +191,7 @@ void loop()
         lcd.print("Final Score: ");
         lcd.print(score);
         delay(10000);
-
+        startTime = millis();
         state = gameStatus::WAITING_START;
         break;
     case gameStatus::SLEEP:
@@ -180,9 +252,24 @@ void lcdInitialPrint()
 
 void readButtons(int *pinToRead, int *buttons, int size)
 {
+    static int lastButtonState[NUM_OF_BUTTON] = {LOW};
+    static unsigned long lastDebounceTime[NUM_OF_BUTTON] = {0};
+
     for (int i = 0; i < size; i++)
     {
-        buttons[i] = digitalRead(pinToRead[i]);
+        int reading = digitalRead(pinToRead[i]);
+
+        if (reading != lastButtonState[i])
+        {
+            lastDebounceTime[i] = millis();
+        }
+
+        if ((millis() - lastDebounceTime[i]) > DEBOUNCE_DELAY)
+        {
+            buttons[i] = reading;
+        }
+
+        lastButtonState[i] = reading;
     }
 }
 
