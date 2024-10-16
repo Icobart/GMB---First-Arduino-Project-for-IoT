@@ -235,12 +235,17 @@ void wakeUp()
     }
     startTime = millis();
     state = gameStatus::WAITING_START;
+    lcd.display();
+    lcd.backlight();
 }
 
 void setIdle()
 {   
     analogWrite(LEDPULSE, 0); // Turn off the LED pulse
-    Serial.println("Going to sleep!");
+
+    lcd.noDisplay(); // Turn off the LCD display
+    lcd.noBacklight(); // Turn off the LCD backlight
+
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_enable();
     for (int i = 0; i < NUM_OF_BUTTON; i++)
@@ -250,7 +255,6 @@ void setIdle()
     sleep_mode();
 
     sleep_disable();
-    Serial.println("Woke up!");
 }
 
 void selectDifficultyLevel()
