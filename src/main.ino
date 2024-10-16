@@ -2,6 +2,7 @@
 #include <avr/sleep.h>/*
 #include "func.h"*/
 #include "TimerOne.h"
+#include <EnableInterrupt.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -228,24 +229,28 @@ void loop()
 
 void wakeUp()
 {
-    sleep_disable();
     for (int i = 0; i < NUM_OF_BUTTON; i++)
     {
-        detachInterrupt(digitalPinToInterrupt(pinToRead[i]));
+        disableInterrupt(pinToRead[i]);
     }
     startTime = millis();
     state = gameStatus::WAITING_START;
 }
 
 void setIdle()
-{
+{   
+    analogWrite(LEDPULSE, 0); // Turn off the LED pulse
+    Serial.println("Going to sleep!");
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_enable();
     for (int i = 0; i < NUM_OF_BUTTON; i++)
     {
-        attachInterrupt(digitalPinToInterrupt(pinToRead[i]), wakeUp, RISING);
+        enableInterrupt(pinToRead[i], wakeUp, RISING);
     }
     sleep_mode();
+
+    sleep_disable();
+    Serial.println("Woke up!");
 }
 
 void selectDifficultyLevel()
