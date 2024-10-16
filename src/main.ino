@@ -45,7 +45,7 @@ unsigned long startTime = millis();
 
 gameStatus state;
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 void wakeUp();
 
@@ -204,7 +204,17 @@ void loop()
         lcd.print("Final Score: ");
         lcd.print(score);
         delay(10000);
-        lcd.clear();
+        // Reset every state to 0
+        for (int i = 0; i < NUM_OF_BUTTON; i++) {
+            previousButtonStates[i] = 0;
+            buttons[i] = 0;
+        }
+        // Turn off all LEDs
+        for (int i = 0; i < NUM_OF_LED; i++) {
+            greenLeds[i] = 0;
+            digitalWrite(pinToWrite[i], LOW);
+        }
+        writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
         startTime = millis();
         state = gameStatus::WAITING_START;
         break;
@@ -258,9 +268,9 @@ void fadingLeds()
 void lcdInitialPrint()
 {
     lcd.setCursor(0, 0);
-    lcd.print("System Ready");
+    lcd.print("Welcome to GMB!");
     lcd.setCursor(0, 1);
-    lcd.print("Press Button");
+    lcd.print("Press B1 to Start");
 }
 
 void readButtons(int *pinToRead, int *buttons, int size)
