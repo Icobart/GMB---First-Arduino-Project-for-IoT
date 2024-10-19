@@ -62,6 +62,14 @@ void readButtons(int *pinToRead, int *buttons, int size);
 
 void writeDigitalLeds(int *pinToWrite, int *greenLeds, int size);
 
+void waitingStart();
+
+void preGame();
+
+void gameLoop();
+
+void gameOver();
+
 void setup()
 {   
     state = gameStatus::WAITING_START;
@@ -76,7 +84,6 @@ void setup()
     currIntensity = 0;
     fadeAmount = 5;
     pinMode(LEDPULSE, OUTPUT);
-    /*to do: lcd*/
     lcd.init();
     lcd.backlight();
     lcd.display();
@@ -89,135 +96,16 @@ void loop()
     switch (state)
     {
     case gameStatus::WAITING_START:
-        lcdInitialPrint();
-        if (buttons[0] == 1)
-        {
-            state = gameStatus::PREGAME;
-        }
-        selectDifficultyLevel();
-        fadingLeds();
-        
-        if (millis() - startTime >= 10000) {
-            state = gameStatus::SLEEP;
-        }
+        waitingStart();
         break;
     case gameStatus::PREGAME:
-        for (int i = 0; i < NUM_OF_LED; i++) {
-            greenLeds[i] = 0;
-            digitalWrite(pinToWrite[i], LOW);
-        }
-        analogWrite(LEDPULSE, 0);
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Go!");
-        delay(2000); // Display the message for 2 seconds
-        lcd.clear();
-        score = 0;
-        state = gameStatus::GAME_LOOP;
-        //setup for the first round
-        correct = false;
-        roundStartTime = millis();
-        // Reset every state to 0
-        for (int i = 0; i < NUM_OF_BUTTON; i++) {
-            previousButtonStates[i] = 0;
-            buttons[i] = 0;
-        }
-        // Turn off all LEDs
-        for (int i = 0; i < NUM_OF_LED; i++) {
-            greenLeds[i] = 0;
-            digitalWrite(pinToWrite[i], LOW);
-        }
-        writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
-
-        // Generate a random number between 0 and 15
-        targetNumber = random(0, 16);
-
-        // Display the random number on the LCD
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Number: ");
-        lcd.print(targetNumber);
+        preGame();
         break;
     case gameStatus::GAME_LOOP:
-        // Update LEDs based on button presses
-        for (int i = 0; i < NUM_OF_BUTTON; i++) {
-            if (buttons[i] == HIGH && previousButtonStates[i] == LOW) {
-                greenLeds[i] = !greenLeds[i];
-            }
-            previousButtonStates[i] = buttons[i]; // Update the previous state
-        }
-        writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
-
-        // Check if the player has composed the correct number
-        composedNumber = 0;
-        for (int i = 0; i < NUM_OF_BUTTON; i++) {
-            composedNumber |= (greenLeds[i] << i);
-        }
-
-        if (composedNumber == targetNumber) {
-            correct = true;
-        }
-
-        if (correct && millis() - roundStartTime < T1) {
-            score += SCORE_INCREMENT;
-            lcd.clear();
-            lcd.setCursor(0, 0);
-            lcd.print("GOOD! Score: ");
-            lcd.print(score);
-            delay(2000); // Display the message for 2 seconds
-
-            // Reduce the time T1 by some factor FACTOR
-            T1 = max(T1 * FACTOR, MIN_T1); // Ensure T1 does not go below a minimum value
-            correct = false;
-            roundStartTime = millis();
-            // Reset every state to 0
-            for (int i = 0; i < NUM_OF_BUTTON; i++) {
-                previousButtonStates[i] = 0;
-              	buttons[i] = 0;
-            }
-            // Turn off all LEDs
-            for (int i = 0; i < NUM_OF_LED; i++) {
-                greenLeds[i] = 0;
-                digitalWrite(pinToWrite[i], LOW);
-            }
-          	writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
-            // Generate a random number between 0 and 15
-            targetNumber = random(0, 16);
-
-            // Display the random number on the LCD
-            lcd.clear();
-            lcd.setCursor(0, 0);
-            lcd.print("Number: ");
-            lcd.print(targetNumber);
-        } else if (!correct && millis() - roundStartTime >= T1) {
-            state = gameStatus::GAME_OVER;
-        }
+        gameLoop();
         break;
     case gameStatus::GAME_OVER:
-        digitalWrite(LEDPULSE, HIGH);
-        delay(1000);
-        digitalWrite(LEDPULSE, LOW);
-
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Game Over");
-        lcd.setCursor(0, 1);
-        lcd.print("Final Score: ");
-        lcd.print(score);
-        delay(10000);
-        // Reset every state to 0
-        for (int i = 0; i < NUM_OF_BUTTON; i++) {
-            previousButtonStates[i] = 0;
-            buttons[i] = 0;
-        }
-        // Turn off all LEDs
-        for (int i = 0; i < NUM_OF_LED; i++) {
-            greenLeds[i] = 0;
-            digitalWrite(pinToWrite[i], LOW);
-        }
-        writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
-        startTime = millis();
-        state = gameStatus::WAITING_START;
+        gameOver();
         break;
     case gameStatus::SLEEP:
         setIdle();
@@ -307,4 +195,144 @@ void writeDigitalLeds(int *pinToWrite, int *greenLeds, int size)
     {
         digitalWrite(pinToWrite[i], greenLeds[i]);
     }
+}
+
+void waitingStart()
+{
+    lcdInitialPrint();
+    if (buttons[0] == 1)
+    {
+        state = gameStatus::PREGAME;
+    }
+    selectDifficultyLevel();
+    fadingLeds();
+    if (millis() - startTime >= 10000) {
+        state = gameStatus::SLEEP;
+    }
+}
+
+void preGame()
+{
+    for (int i = 0; i < NUM_OF_LED; i++) {
+        greenLeds[i] = 0;
+        digitalWrite(pinToWrite[i], LOW);
+    }
+    analogWrite(LEDPULSE, 0);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Go!");
+    delay(2000); // Display the message for 2 seconds
+    lcd.clear();
+    score = 0;
+    state = gameStatus::GAME_LOOP;
+    //setup for the first round
+    correct = false;
+    roundStartTime = millis();
+    // Reset every state to 0
+    for (int i = 0; i < NUM_OF_BUTTON; i++) {
+        previousButtonStates[i] = 0;
+        buttons[i] = 0;
+    }
+    // Turn off all LEDs
+    for (int i = 0; i < NUM_OF_LED; i++) {
+        greenLeds[i] = 0;
+        digitalWrite(pinToWrite[i], LOW);
+    }
+    writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
+
+    // Generate a random number between 0 and 15
+    randomSeed(analogRead(12)); // Seed the random number generator with a noise value
+    targetNumber = random(0, 16);
+
+    // Display the random number on the LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Number: ");
+    lcd.print(targetNumber);
+}
+
+void gameLoop()
+{
+    // Update LEDs based on button presses
+    for (int i = 0; i < NUM_OF_BUTTON; i++) {
+        if (buttons[i] == HIGH && previousButtonStates[i] == LOW) {
+            greenLeds[i] = !greenLeds[i];
+        }
+        previousButtonStates[i] = buttons[i]; // Update the previous state
+    }
+    writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
+
+    // Check if the player has composed the correct number
+    composedNumber = 0;
+    for (int i = 0; i < NUM_OF_BUTTON; i++) {
+        composedNumber |= (greenLeds[i] << i);
+    }
+
+    if (composedNumber == targetNumber) {
+        correct = true;
+    }
+
+    if (correct && millis() - roundStartTime < T1) {
+        score += SCORE_INCREMENT;
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("GOOD! Score: ");
+        lcd.print(score);
+        delay(2000); // Display the message for 2 seconds
+
+        // Reduce the time T1 by some factor FACTOR
+        T1 = max(T1 * FACTOR, MIN_T1); // Ensure T1 does not go below a minimum value
+        correct = false;
+        roundStartTime = millis();
+        // Reset every state to 0
+        for (int i = 0; i < NUM_OF_BUTTON; i++) {
+            previousButtonStates[i] = 0;
+            buttons[i] = 0;
+        }
+        // Turn off all LEDs
+        for (int i = 0; i < NUM_OF_LED; i++) {
+            greenLeds[i] = 0;
+            digitalWrite(pinToWrite[i], LOW);
+        }
+        writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
+        // Generate a random number between 0 and 15
+        randomSeed(analogRead(12)); // Seed the random number generator with a noise value
+        targetNumber = random(0, 16);
+
+        // Display the random number on the LCD
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Number: ");
+        lcd.print(targetNumber);
+    } else if (!correct && millis() - roundStartTime >= T1) {
+        state = gameStatus::GAME_OVER;
+    }
+}
+
+void gameOver()
+{
+    digitalWrite(LEDPULSE, HIGH);
+    delay(1000);
+    digitalWrite(LEDPULSE, LOW);
+
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Game Over");
+    lcd.setCursor(0, 1);
+    lcd.print("Final Score: ");
+    lcd.print(score);
+    delay(10000);
+    // Reset every state to 0
+    for (int i = 0; i < NUM_OF_BUTTON; i++) {
+        previousButtonStates[i] = 0;
+        buttons[i] = 0;
+    }
+    // Turn off all LEDs
+    for (int i = 0; i < NUM_OF_LED; i++) {
+        greenLeds[i] = 0;
+        digitalWrite(pinToWrite[i], LOW);
+    }
+    writeDigitalLeds(pinToWrite, greenLeds, NUM_OF_LED);
+    startTime = millis();
+    state = gameStatus::WAITING_START;
 }
