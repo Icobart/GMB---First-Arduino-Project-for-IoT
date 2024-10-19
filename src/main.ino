@@ -105,6 +105,8 @@ void loop()
         break;
     case gameStatus::SLEEP:
         setIdle();
+        delay(250); // delay to enter waiting start by pressing B1 button
+                    // to wake up the microcontroller without entering immediately in pregame
         break;
     default:
         break;
@@ -114,7 +116,7 @@ void loop()
 void waitingStart()
 {
     lcdInitialPrint();
-    if (buttons[0] == 1)
+    if (buttons[3] == 1)
     {
         state = gameStatus::PREGAME;
     }
@@ -154,8 +156,8 @@ void gameLoop()
 
 void gameOver()
 {
-    handleGameOver();
     resetGameState();
+    handleGameOver();
     startTime = millis();
     state = gameStatus::WAITING_START;
 }
