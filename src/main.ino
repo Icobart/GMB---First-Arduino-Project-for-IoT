@@ -31,7 +31,6 @@ int pinToWrite[NUM_OF_BUTTON] = {6, 7, 8, 9};
 int buttons[NUM_OF_BUTTON];
 int greenLeds[NUM_OF_LED];
 
-int brightness;
 int fadeAmount;
 int currIntensity;
 int difficultyLevel;
