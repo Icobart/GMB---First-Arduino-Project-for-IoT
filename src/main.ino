@@ -68,6 +68,7 @@ void handleGameOver(); // Function to handle the game over state
 
 void setup()
 {   
+    randomSeed(analogRead(11)); // Seed the random number generator with a noise value
     state = gameStatus::WAITING_START;
     for (int i = 0; i < NUM_OF_BUTTON; i++)
     {
@@ -215,6 +216,9 @@ void lcdInitialPrint()
     lcd.print("Welcome to GMB!");
     lcd.setCursor(0, 1);
     lcd.print("Press B1 to Start");
+    lcd.setCursor(0, 2);
+    lcd.print("Difficulty Level: ");
+    lcd.print(difficultyLevel);
 }
 
 void readButtons(int *pinToRead, int *buttons, int size)
@@ -262,7 +266,6 @@ void resetGameState()
 void displayRandomNumber()
 {
     // Generate a random number between 0 and 15
-    randomSeed(analogRead(12)); // Seed the random number generator with a noise value
     targetNumber = random(0, 16);
 
     // Display the random number on the LCD
