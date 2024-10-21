@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <avr/sleep.h>/*
 #include "func.h"*/
-#include "TimerOne.h"
+#include <TimerOne.h>
 #include <EnableInterrupt.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -170,8 +170,6 @@ void wakeUp()
     }
     startTime = millis();
     state = gameStatus::WAITING_START;
-    lcd.display();
-    lcd.backlight();
 }
 
 void setIdle()
@@ -190,6 +188,8 @@ void setIdle()
     sleep_mode();
 
     sleep_disable();
+    lcd.display();
+    lcd.backlight();
 }
 
 void selectDifficultyLevel()
