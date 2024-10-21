@@ -33,6 +33,7 @@ int greenLeds[NUM_OF_LED];
 
 int fadeAmount;
 int currIntensity;
+int currentPotValue;
 int difficultyLevel;
 int score;
 bool correct=false;
@@ -196,8 +197,12 @@ void setIdle()
 void selectDifficultyLevel()
 {
     int potValue = analogRead(POTENTIOMETER);
-    difficultyLevel = map(potValue, 0, 1023, 1, 4);
-    T1 = 10000 / difficultyLevel;
+    if (potValue != currentPotValue)
+    {
+        currentPotValue = potValue;
+        difficultyLevel = map(potValue, 0, 1023, 1, 5);
+        T1 = 10000 / difficultyLevel;
+    }
 }
 
 void fadingLeds()
