@@ -1,6 +1,5 @@
 #include <Arduino.h>
-#include <avr/sleep.h>/*
-#include "func.h"*/
+#include <avr/sleep.h>
 #include <TimerOne.h>
 #include <EnableInterrupt.h>
 #include <Wire.h>
