@@ -57,7 +57,7 @@ void wakeUp(); // Function to wake up the microcontroller from sleep mode
 void setIdle(); // Function to put the microcontroller to sleep
 void selectDifficultyLevel(); // Function to select the difficulty level
 void fadingLeds(); // Function to fade the LED Ls
-void lcdInitialPrint(); // Function to print the initial message on the LCD
+void lcdInitialPrint(); // Function to print the waiting start message on the LCD
 void readButtons(int *pinToRead, int *buttons, int size); // Function to read the buttons
 void writeDigitalLeds(int *pinToWrite, int *greenLeds, int size); // Function to write to the digital green LEDs
 void resetGameState(); // Function to reset the game state
@@ -65,7 +65,7 @@ void displayRandomNumber(); // Function to display a random number on the LCD
 void updateLedsBasedOnButtons(); // Function to update the LEDs based on the button presses
 void checkCorrectNumber(); // Function to check if the player has composed the correct number
 void handleCorrectNumber(); // Function to handle the case when the player has composed the correct number
-void handleGameOver(); // Function to handle the game over state
+void handleGameOver(); // Function to handle the case when the player has lost the game
 
 void setup()
 {   
